@@ -2,23 +2,19 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useWishlistStore = defineStore('wishlist', () => {
-  const products = ref([]);
-  const selectedCategory = ref(null);
+  const categories = ref([]);       // список категорий
+  const products = ref({});         // товары по категориям
 
-  const addProduct = (product) => {
-    products.value.push(product);
-  };
+  function setWishlist(newWishlist) {
+    categories.value = Object.keys(newWishlist);
+    products.value = newWishlist;
+  }
 
-  const removeProduct = (url) => {
-    products.value = products.value.filter(p => p.url !== url);
-  };
+  function addProduct(category, product) {
+    if (!products.value[category]) products.value[category] = [];
+    const exists = products.value[category].some(p => p.url === product.url);
+    if (!exists) products.value[category].push(product);
+  }
 
-  const getCategoryCounts = () => {
-    return products.value.reduce((acc, p) => {
-      acc[p.category] = (acc[p.category] || 0) + 1;
-      return acc;
-    }, {});
-  };
-
-  return { products, selectedCategory, addProduct, removeProduct, getCategoryCounts };
+  return { categories, products, setWishlist, addProduct };
 });

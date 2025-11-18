@@ -1,3 +1,7 @@
+// public/popup.js
+
+const container = document.getElementById('wishlist-container');
+
 chrome.runtime.sendMessage({ action: 'getWishlist' }, ({ wishlist }) => {
   container.innerHTML = '';
 
@@ -6,12 +10,11 @@ chrome.runtime.sendMessage({ action: 'getWishlist' }, ({ wishlist }) => {
     catTitle.textContent = category;
     container.appendChild(catTitle);
 
-    const products = wishlist[category] || []; // <--- вот исправление
-    products.forEach(product => {
+    wishlist[category].forEach(product => {
       const div = document.createElement('div');
       div.innerHTML = `
-        <strong>${product.title}</strong> - ${product.price} <br>
-        <img src="${product.image}" width="50">
+        <strong>${product.title}</strong> (${product.brand}) — ${product.price}<br>
+        <img src="${product.image}" width="50" style="margin-top:5px"><br><br>
       `;
       container.appendChild(div);
     });

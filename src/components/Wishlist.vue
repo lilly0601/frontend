@@ -1,34 +1,30 @@
 <template>
-  <div class="p-4">
-    <h2 class="text-xl font-bold mb-2">Вишлист</h2>
-    <div v-if="filteredProducts.length === 0" class="text-gray-500">Нет товаров</div>
-    <WishlistItem
-      v-for="item in filteredProducts"
-      :key="item.url"
-      :item="item"
-      @remove="removeProduct"
-    />
+  <div>
+    <h2>Мой Fashion Wishlist</h2>
+    <div v-for="(products, category) in wishlist" :key="category" style="margin-bottom: 10px;">
+      <button 
+        @click="openCategory(category)" 
+        style="width:100%; text-align:left; padding:5px; cursor:pointer;">
+        {{ category }} ({{ products.length }})
+      </button>
+    </div>
   </div>
 </template>
 
-<script>
-import { useWishlistStore } from '../store/wishlist.js';
-import WishlistItem from './WishlistItem.vue';
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-export default {
-  components: { WishlistItem },
-  setup() {
-    const store = useWishlistStore();
-    const removeProduct = (url) => {
-      store.removeProduct(url);
-    };
-    // Фильтрация по выбранной категории
-    const filteredProducts = computed(() => {
-      if (!store.selectedCategory) return store.products;
-      return store.products.filter(p => p.category === store.selectedCategory);
-    });
+const wishlist = ref({});
+const router = useRouter();
 
-    return { filteredProducts, removeProduct };
-  }
+onMounted(() => {
+  chrome.runtime.sendMessage({ action: 'getWishlist' }, ({ wishlist: data }) => {
+    wishlist.value = data;
+  });
+});
+
+function openCategory(category) {
+  router.push(`/category/${encodeURIComponent(category)}`);
 }
 </script>
