@@ -5,7 +5,9 @@
       <h4 class="font-semibold">{{ item.title }}</h4>
       <p class="text-gray-500">{{ item.price }} KZT</p>
     </div>
-    <MyButton @click="$emit('remove', item.url)" classes="bg-red-500 hover:bg-red-600 px-2 py-1">Удалить</MyButton>
+    <MyButton @click="$emit('remove', item.url)" classes="bg-red-500 hover:bg-red-600 px-2 py-1">
+      Удалить
+    </MyButton>
   </div>
 </template>
 
@@ -13,9 +15,7 @@
 import MyButton from './MyButton.vue';
 
 export default {
-  props: {
-    item: Object
-  },
+  props: { item: Object },
   components: { MyButton }
 }
 </script>

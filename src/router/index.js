@@ -1,13 +1,23 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import WishlistView from '../components/Wishlist.vue';
-import CategoryView from '../components/CategoryItem.vue';
+import Login from '../components/Login.vue';
+import Wishlist from '../components/Wishlist.vue';
 
 const routes = [
-  { path: '/', component: WishlistView },
-  { path: '/category/:name', component: CategoryView, props: true }
+  { path: '/login', name: 'Login', component: Login },
+  { path: '/', name: 'Wishlist', component: Wishlist },
+  // { path: '/', name: 'Wishlist', component: Wishlist },
 ];
 
-export const router = createRouter({
+const router = createRouter({
   history: createWebHashHistory(),
   routes
 });
+
+router.beforeEach((to, from, next) => {
+  const jwt = localStorage.getItem('jwt');
+  if (!jwt && to.name !== 'Login') next({ name: 'Login' });
+  else if (jwt && to.name === 'Login') next({ name: 'Wishlist' });
+  else next();
+});
+
+export default router;

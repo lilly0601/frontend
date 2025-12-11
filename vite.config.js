@@ -1,24 +1,23 @@
-import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [vue()],
   build: {
+    outDir: 'dist',
+    emptyOutDir: false, // не удаляет manifest.json
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'index.html'),
-        ackground: resolve(__dirname, 'src/background/background.js'),
-        content: resolve(__dirname, 'src/content/content.js')
+        popup: resolve(__dirname, 'index.html'), // твой popup
+        background: resolve(__dirname, 'public/background/background.js'),
+        content: resolve(__dirname, 'public/content/content.js')
       },
       output: {
-        entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]'
+        entryFileNames: `[name].js`,
+        chunkFileNames: `chunks/[name].js`,
+        assetFileNames: `assets/[name].[ext]`
       }
-    },
-    outDir: 'dist'
+    }
   }
 })
-

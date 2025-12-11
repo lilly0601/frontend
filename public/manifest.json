@@ -1,37 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "Lyli's Wishlist",
+  "name": "Vue Push Extension",
   "version": "1.0.0",
-  "description": "Расширение для сохранения желаемых товаров 💖",
-
+  "description": "Расширение на Vue с push-уведомлениями от Express.js",
+  "icons": {
+    "16": "16.png",
+    "48": "48.png",
+    "128": "128.png"
+  },
+  "permissions": [
+    "notifications",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "16.png",
-      "48": "48.png",
-      "128": "128.png"
+      "48": "48.png"
     }
   },
-
-  "background": {
-    "service_worker": "assets/ackground.js",
-    "type": "module"
-  },
-
-  "permissions": ["storage", "tabs", "activeTab", "scripting"],
-  "host_permissions": ["<all_urls>"],
-
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://*/*"],
-      "js": ["assets/content.js"],
-      "run_at": "document_idle"
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
     }
   ],
   "web_accessible_resources": [
-    {
-      "resources": ["category.html", "assets/category.js", "assets/popup.css"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  {
+    "resources": ["dist/*"],
+    "matches": ["<all_urls>"]
+  }
+]
 }
