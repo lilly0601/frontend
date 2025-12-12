@@ -11,6 +11,8 @@ function addWishlistButtons() {
     const price = li.querySelector(".product-price")?.innerText || "0";
     const url = li.querySelector("a")?.href || "";
     const img = li.querySelector("img")?.src || "";
+    const fullNameEl = li.querySelector("p[data-component='ProductCardDescription']");
+    const fullName = fullNameEl ? fullNameEl.innerText.trim() : title;
 
     const btn = document.createElement("button");
     btn.textContent = "Вишлист";
@@ -34,15 +36,16 @@ function addWishlistButtons() {
           price,
           url,
           image: img,
-          category: "Обувь"
+          category: "Обувь",
+          fullName
         }
       }, (res) => {
-          if (res?.status === "ok") {
-            btn.textContent = "✅ Добавлено";
-            btn.disabled = true;
-          }
-        });
+        if (res?.status === "ok") {
+          btn.textContent = "✅ Добавлено";
+          btn.disabled = true;
+        }
       });
+    });
 
     li.appendChild(btn);
   });

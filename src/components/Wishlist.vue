@@ -8,31 +8,17 @@
 
     <h1 class="text-4xl font-bold text-red-600 mb-6 text-center animate-bounce">🎄 Ваш Wishlist 🎁</h1>
     
-    <<!-- Кнопка "Все категории" -->
-    <div class="p-6">
-      <button
-        @click="showAll = !showAll"
-        class="px-4 py-2 bg-red-400 text-white rounded-xl mb-4"
+
+    <!-- Кнопка "Все категории" -->
+    <div class="mb-4 flex justify-center">
+      <button 
+        @click="showAllCategories" 
+        class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-bold transition-all duration-200"
       >
         Все категории
       </button>
-
-      <div v-if="showAll">
-        <div v-for="cat in wishlistStore.products" :key="cat.category" class="mb-4">
-          <h2 class="text-lg font-bold text-red-600 mb-2">{{ cat.category }}</h2>
-          <ul>
-            <li
-              v-for="item in cat.items"
-              :key="item.id"
-              class="py-2 px-3 bg-green-50 rounded-lg mb-2 border hover:bg-green-100"
-            >
-              {{ item.name }} — {{ item.price }}₸
-            </li>
-          </ul>
-        </div>
-      </div>
     </div>
-    
+
     <!-- Список товаров -->
     <div>
       <div 
@@ -79,7 +65,7 @@
   </div>
 </template>
 
-<script>
+<script>  
 import { ref, onMounted, computed } from "vue";
 import { useWishlistStore } from "../stores/wishlistStore.js";
 import axios from "axios";
@@ -106,6 +92,23 @@ export default {
         }
       } catch (err) {
         console.error("Failed to load wishlist:", err.response?.data || err.message);
+      }
+    };
+
+    const addToWishlist = async (productId) => {
+      try {
+        const token = localStorage.getItem('jwt');
+        if (!token) throw new Error("Вы не авторизованы");
+
+        await axios.post('http://localhost:3000/api/wishlist/add', 
+          { product_id: productId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        alert("Товар добавлен в избранное!");
+      } catch (err) {
+        console.error(err.response?.data?.message || err.message);
+        alert("Не удалось добавить товар в избранное");
       }
     };
 
@@ -138,14 +141,16 @@ export default {
 
     // Компьютед для списка всех товаров
     const productsList = computed(() => filteredProducts.value);
-
-
-    // Кнопка "Все категории"
-    const showAllCategories = () => wishlistStore.showAllCategories();
     return { 
-      wishlistStore, selectedItem, openItem, closeModal, saveItem, 
-      randomSnowflakeStyle, productsList, selectedCategory, filteredProducts, showAllCategories
-    };
+        wishlistStore, selectedItem, openItem, closeModal, saveItem, 
+        randomSnowflakeStyle, productsList, selectedCategory, filteredProducts, addToWishlist
+    }
+  },
+  methods: {
+    // Кнопка "Все категории"
+    async showAllCategories() {
+      this.$router.push('/categories')
+    }
   }
 };
 </script>

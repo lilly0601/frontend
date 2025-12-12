@@ -50,6 +50,26 @@ export const useCategoryStore = defineStore("category", {
       }
     },
 
+    async addToWishlist(productId) {
+      const userStore = useUserStore();
+      try {
+        const res = await axios.post(
+          "http://localhost:3000/api/wishlist/add",
+          { product_id: productId },
+          {
+            headers: {
+              Authorization: `Bearer ${userStore.token}`
+            }
+          }
+        );
+
+        // добавляем в локальный store
+        this.wishlist.push(res.data);
+
+      } catch (err) {
+        this.error = err.response?.data?.message || "Ошибка при добавлении";
+      }
+    },  
     clear() {
       this.categories = [];
       this.wishlist = [];
