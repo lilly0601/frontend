@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col  min-h-screen bg-gradient-to-b from-red-50 via-white to-red-100 relative overflow-hidden p-4">
+  <div class="flex flex-col min-h-screen bg-gradient-to-b from-red-50 via-white to-red-100 relative overflow-hidden p-4">
 
     <!-- Снежинки -->
     <div class="absolute top-0 left-0 w-full h-full pointer-events-none">
@@ -7,16 +7,40 @@
     </div>
 
     <h1 class="text-4xl font-bold text-red-600 mb-6 text-center animate-bounce">🎄 Ваш Wishlist 🎁</h1>
+    
+    <<!-- Кнопка "Все категории" -->
+    <div class="p-6">
+      <button
+        @click="showAll = !showAll"
+        class="px-4 py-2 bg-red-400 text-white rounded-xl mb-4"
+      >
+        Все категории
+      </button>
 
+      <div v-if="showAll">
+        <div v-for="cat in wishlistStore.products" :key="cat.category" class="mb-4">
+          <h2 class="text-lg font-bold text-red-600 mb-2">{{ cat.category }}</h2>
+          <ul>
+            <li
+              v-for="item in cat.items"
+              :key="item.id"
+              class="py-2 px-3 bg-green-50 rounded-lg mb-2 border hover:bg-green-100"
+            >
+              {{ item.name }} — {{ item.price }}₸
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
     <!-- Список товаров -->
-    <div class="">
+    <div>
       <div 
-        class="flex justify-between bg-white p-4 rounded-[10px]"
-        v-for="item in productsList"
+        class="flex justify-between bg-white p-4 rounded-[10px] mb-2"
+        v-for="item in filteredProducts"
         :key="item.id"
         @click="openItem(item)"
-        
-        >
+      >
         <div class="flex flex-col">
           <h2 class="font-bold text-lg text-red-600">{{ item.name || "Товар #" + item.id }}</h2>
           <p class="text-green-700 text-sm mt-1 truncate">{{ item.Product.name || "Без названия" }}</p>
@@ -31,7 +55,6 @@
         </div>
       </div>
     </div>
-    
 
     <!-- Модальное окно редактирования -->
     <div v-if="selectedItem" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -66,6 +89,7 @@ export default {
   setup() {
     const wishlistStore = useWishlistStore();
     const selectedItem = ref(null);
+    const selectedCategory = ref(null);
 
     // Загрузка wishlist с сервера
     const loadWishlistItems = async () => {
@@ -78,54 +102,19 @@ export default {
         });
 
         if (res.status === 200) {
-          wishlistStore.setWishlist(res.data);
+          wishlistStore.setWishlist(res.data); // используется setWishlist из store
         }
       } catch (err) {
         console.error("Failed to load wishlist:", err.response?.data || err.message);
       }
     };
 
-    // Подписка на пуши
-    const subscribeToPush = async () => {
-      if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-
-      const reg = await navigator.serviceWorker.register("/sw.js");
-      const subscription = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY)
-      });
-
-      const token = localStorage.getItem("jwt");
-      const userId = 1; // или получить из store
-
-      await axios.post("http://localhost:3000/api/push/subscribe", {
-        subscription,
-        userId
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    };
-
-    const urlBase64ToUint8Array = (base64String) => {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
-    };
-
-    onMounted(() => {
-      loadWishlistItems();
-      subscribeToPush();
-    });
-
-    // Методы
+    // Методы модального окна
     const openItem = (item) => selectedItem.value = { ...item };
     const closeModal = () => selectedItem.value = null;
     const saveItem = () => {
       const index = wishlistStore.products.findIndex(p => p.id === selectedItem.value.id);
-      if (index !== -1) {
-        wishlistStore.products[index] = { ...selectedItem.value };
-      }
+      if (index !== -1) wishlistStore.products[index] = { ...selectedItem.value };
       closeModal();
     };
 
@@ -137,10 +126,26 @@ export default {
       return { left: `${left}%`, fontSize: `${size}rem`, animationDuration: `${duration}s`, animationDelay: `${delay}s` };
     };
 
-    // Компьютед свойства
-    const productsList = computed(() => wishlistStore.products || []);
+    onMounted(() => {
+      loadWishlistItems();
+    });
 
-    return { selectedItem, openItem, closeModal, saveItem, randomSnowflakeStyle, productsList };
+    // Фильтруем товары по выбранной категории
+    const filteredProducts = computed(() => {
+      if (!selectedCategory.value) return Object.values(wishlistStore.products).flat();
+      return wishlistStore.products[selectedCategory.value] || [];
+    });
+
+    // Компьютед для списка всех товаров
+    const productsList = computed(() => filteredProducts.value);
+
+
+    // Кнопка "Все категории"
+    const showAllCategories = () => wishlistStore.showAllCategories();
+    return { 
+      wishlistStore, selectedItem, openItem, closeModal, saveItem, 
+      randomSnowflakeStyle, productsList, selectedCategory, filteredProducts, showAllCategories
+    };
   }
 };
 </script>
@@ -150,7 +155,7 @@ export default {
   position: absolute;
   top: -10%;
   opacity: 0.8;
-  animation-name: fall;
+  animation-name: fall; 
   animation-timing-function: linear;
   animation-iteration-count: infinite;
 }

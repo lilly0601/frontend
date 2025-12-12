@@ -54,4 +54,3 @@ document.addEventListener("DOMContentLoaded", addWishlistButtons);
 // Отслеживаем динамически подгружаемые элементы
 const observer = new MutationObserver(addWishlistButtons);
 observer.observe(document.body, { childList: true, subtree: true });
-

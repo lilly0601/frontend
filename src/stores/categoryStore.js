@@ -18,7 +18,7 @@ export const useCategoryStore = defineStore("category", {
       this.error = null;
 
       try {
-        const res = await axios.get("http://localhost:3000/api/category/all", {
+        const res = await axios.get("http://localhost:3000/api/categories/all", {
           headers: {
             Authorization: `Bearer ${userStore.token}`
           }
@@ -37,7 +37,7 @@ export const useCategoryStore = defineStore("category", {
       this.error = null;
 
       try {
-        const res = await axios.get("http://localhost:3000/api/wishlist/me", {
+        const res = await axios.get("http://localhost:3000/api/wishlist/all", {
           headers: {
             Authorization: `Bearer ${userStore.token}`
           }
